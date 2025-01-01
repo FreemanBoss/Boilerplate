@@ -103,6 +103,7 @@ if __name__ == "__main__":
     uvicorn.run(
         "main:app",
         port=7001,
+        host="0.0.0.0",
         reload=True,
         timeout_keep_alive=20,
     )
