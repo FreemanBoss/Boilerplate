@@ -10160,3 +10160,7 @@
 {"time": "2024-12-29 12:34:07,289", "level": "INFO", "message": "Shutting Down Application", "name": "Main App"}
 {"time": "2024-12-29 12:53:01,833", "level": "INFO", "message": "Starting Application", "name": "Main App"}
 {"time": "2024-12-29 12:53:01,833", "level": "INFO", "message": "Starting Application", "name": "Main App"}
+{"time": "2025-01-01 14:05:37,587", "level": "INFO", "message": "Starting Application", "name": "Main App"}
+{"time": "2025-01-01 14:05:37,587", "level": "INFO", "message": "Starting Application", "name": "Main App"}
+{"time": "2025-01-01 14:08:52,179", "level": "INFO", "message": "Shutting Down Application", "name": "Main App"}
+{"time": "2025-01-01 14:08:52,179", "level": "INFO", "message": "Shutting Down Application", "name": "Main App"}
