@@ -50,8 +50,8 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="Bondyt API",
-    description="Bondyt API documentation",
+    title="Freeman FastAPI Boilerplate",
+    description="Freeman FastAPI Boilerplate documentation",
     version="1.0.0",
     lifespan=lifespan,
     json_dumps=orjson_dumps,
@@ -89,7 +89,7 @@ async def read_root() -> dict:
     """
     Read root
     """
-    return {"message": "Welcome to Bondyt API"}
+    return {"message": "Welcome to Freeman FastAPI Boilerplate"}
 
 
 app.add_exception_handler(HTTPException, http_exception)
@@ -104,5 +104,5 @@ if __name__ == "__main__":
         "main:app",
         port=7001,
         reload=True,
-        timeout_keep_alive=60,
+        timeout_keep_alive=20,
     )
