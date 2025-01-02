@@ -79,7 +79,7 @@ class User(ModelMixin, Base):
         DateTime(timezone=True),
         nullable=True
     )
-    email_verified: Mapped[bool] = mapped_column(Boolean, default=False)
+    email_verified: Mapped[bool] = mapped_column(Boolean, default=True)
     idempotency_key: Mapped[str] = mapped_column(String(255), nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     is_deleted: Mapped[bool] = mapped_column(Boolean, default=False)
