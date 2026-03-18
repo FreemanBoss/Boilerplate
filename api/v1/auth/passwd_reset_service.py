@@ -68,6 +68,9 @@ class RequestPasswordService(Service):
 
             user.password = hashed_password
             await db.commit()
+            await self.delete(user_token, db)
+            response_data = self.get_reset_token_response(access_token, user)
+            return response_data, refresh_token
         else:
             raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="reset_token already used")
 

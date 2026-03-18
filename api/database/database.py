@@ -1,10 +1,8 @@
-import asyncio
 from typing import AsyncIterator, Union, TypeVar
 from contextlib import contextmanager
 from datetime import datetime
 from uuid6 import uuid7
 from sqlalchemy.ext.asyncio import (
-    async_scoped_session,
     async_sessionmaker,
     AsyncEngine,
     create_async_engine,
@@ -55,11 +53,6 @@ async_session_factory = async_sessionmaker(
     bind=async_engine, class_=AsyncSession, autoflush=False, expire_on_commit=False
 )
 
-# Create scoped session tied to async loop
-AsyncScoppedSession = async_scoped_session(
-    session_factory=async_session_factory, scopefunc=asyncio.current_task
-)
-
 
 # async session
 async def get_async_session() -> AsyncIterator[AsyncSession]:
@@ -67,16 +60,13 @@ async def get_async_session() -> AsyncIterator[AsyncSession]:
     Dependency to provide a database async session for each request.
     Handles session lifecycle including commit and rollback.
     """
-    async with AsyncScoppedSession() as session:
+    async with async_session_factory() as session:
         try:
             yield session
             await session.commit()
         except SQLAlchemyError:
             await session.rollback()
             raise
-        finally:
-            await AsyncScoppedSession.remove()
-            await session.close()
 
 
 # synchronous database engine

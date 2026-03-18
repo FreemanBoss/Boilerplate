@@ -29,7 +29,7 @@ async def count_active_users(
     """
     Count all active users in the system.
     """
-    decoded = await verify_token(access_token, request, "access")
+    await verify_token(access_token, request, "access")
     active_user_count = await user_service.count_active_users(session=session)
     return {"message": "Active user count retrieved successfully.", "data": active_user_count}
 
@@ -39,11 +39,11 @@ async def count_active_users(
     response_model=UserDataSchema,
     status_code=status.HTTP_200_OK,
     responses=responses,
+    dependencies=[Depends(oauth2_scheme)],
 )
 async def get_user(
     user_id: str,
     session: Annotated[AsyncSession, Depends(get_async_session)],
-    current_user: Annotated[str, Depends(oauth2_scheme)],
 ):
     """
     Retrieve a user by their ID.
@@ -61,10 +61,10 @@ async def get_user(
     response_model=PaginatedUsersResponse,
     status_code=status.HTTP_200_OK,
     responses=responses,
+    dependencies=[Depends(oauth2_scheme)],
 )
 async def get_all_users(
     session: Annotated[AsyncSession, Depends(get_async_session)],
-    current_user: Annotated[str, Depends(oauth2_scheme)],
     page: int = Query(1, ge=1, description="Page number for pagination"),
     page_size: int = Query(10, ge=1, le=100, description="Number of items per page"),
 ):
@@ -81,17 +81,19 @@ async def get_all_users(
     response_model=UserDataSchema,
     status_code=status.HTTP_200_OK,
     responses=responses,
+    dependencies=[Depends(oauth2_scheme)],
 )
 async def update_user(
     user_id: str,
     user_data: UserUpdateSchema,
     session: Annotated[AsyncSession, Depends(get_async_session)],
-    current_user: Annotated[str, Depends(oauth2_scheme)],
 ):
     """
     Update a user's details.
     """
-    updated_user = await user_service.update_user(user_id=user_id, schema=user_data.dict(), session=session)
+    updated_user = await user_service.update_user(
+        user_id=user_id, schema=user_data.model_dump(), session=session
+    )
     if not updated_user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="User not found."
@@ -106,11 +108,11 @@ async def update_user(
         204: {"description": "User successfully deactivated (soft delete)."},
         404: {"description": "User not found."},
     },
+    dependencies=[Depends(oauth2_scheme)],
 )
 async def delete_user(
     user_id: str,
     session: Annotated[AsyncSession, Depends(get_async_session)],
-    current_user: Annotated[str, Depends(oauth2_scheme)],
 ):
     """
     Deactivate (soft delete) a user by their ID.
@@ -127,11 +129,11 @@ async def delete_user(
     response_model=UserDataSchema,
     status_code=status.HTTP_200_OK,
     responses=responses,
+    dependencies=[Depends(oauth2_scheme)],
 )
 async def fetch_user_roles(
     user_id: str,
     session: Annotated[AsyncSession, Depends(get_async_session)],
-    current_user: Annotated[str, Depends(oauth2_scheme)],
 ):
     """
     Retrieve user roles along with user details.

@@ -109,3 +109,4 @@ class DateBookingService(Service):
         return booking
 
 date_booking_service = DateBookingService(Place)
+date_invitation_service = Service(DateInvitation)

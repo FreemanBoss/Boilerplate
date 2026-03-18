@@ -15,7 +15,7 @@ from api.core.exception_handlers import (
     redis_exception_handler,
     sqlalchemy_exception_handler,
     exception,
-    validation_excption_handler,
+    validation_exception_handler,
 )
 from api.core.middleware import RequestLoggerMiddleware, SetHeadersMiddleware
 from starlette.middleware.sessions import SessionMiddleware
@@ -40,7 +40,11 @@ async def lifespan(app: FastAPI):
     """
     App instance lifspan
     """
-    await seed_users()
+    if not Config.TEST:
+        try:
+            await seed_users()
+        except Exception:
+            logger.error("User seeding failed during startup", exc_info=True)
     logger.info(msg="Starting Application")
     try:
         yield
@@ -55,7 +59,7 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan,
     json_dumps=orjson_dumps,
-    json_loads=orjson_dumps,
+    json_loads=orjson.loads,
 )
 
 
@@ -63,7 +67,6 @@ origins = [
     "*",
     "127.0.0.1",
 ]
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -94,7 +97,7 @@ async def read_root() -> dict:
 
 app.add_exception_handler(HTTPException, http_exception)
 app.add_exception_handler(SQLAlchemyError, sqlalchemy_exception_handler)
-app.add_exception_handler(RequestValidationError, validation_excption_handler)
+app.add_exception_handler(RequestValidationError, validation_exception_handler)
 app.add_exception_handler(RedisError, redis_exception_handler)
 app.add_exception_handler(Exception, exception)
 

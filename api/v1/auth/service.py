@@ -104,12 +104,14 @@ class AuthService:
 
             # Check if user has 2FA enabled
             if user_exists.two_factor_enabled:
-            # Check if device is trusted
-                is_trusted = await trusted_device_service.verify_device_trust(
-                    user_exists.id, 
-                    schema.device_info, 
-                    session
-                )
+                # Check if device is trusted only when device metadata is provided.
+                is_trusted = False
+                if schema.device_info is not None:
+                    is_trusted = await trusted_device_service.verify_device_trust(
+                        user_exists.id,
+                        schema.device_info,
+                        session,
+                    )
                 
                 if is_trusted:
                     # Skip 2FA and generate tokens directly
@@ -146,8 +148,11 @@ class AuthService:
                 is_deleted=user.is_deleted,
                 roles=[role.name for role in user.roles],
             )
+        role_name = user.roles[0].name if user.roles else "user"
 
         profile = await profile_service.fetch({"user_id": user.id}, session)
+        if profile is None:
+            profile = await profile_service.create({"user_id": user.id}, session)
         profile_base = ProfileBase.model_validate(profile, from_attributes=True)
 
         # generate tokens
@@ -157,23 +162,27 @@ class AuthService:
         subscription = await subscription_service.fetch(
             {"subscriber_id": user.id}, session
         )
-        expires_in = subscription.expires_in.strftime("%Y/%m/%d %H:%M:%S")
+        expires_in = ""
+        sub_plan_id = ""
+        if subscription is not None:
+            expires_in = subscription.expires_in.strftime("%Y/%m/%d %H:%M:%S")
+            sub_plan_id = subscription.subscription_plan_id
         access_token = await generate_jwt_token(
             {
                 "user_id": user.id,
                 "user_agent": request.headers.get("user-agent"),
-                "role": user.roles[0].name,
+                "role": role_name,
                 "sub_plan_expires_in": expires_in,
-                "sub_plan_id": subscription.subscription_plan_id,
+                "sub_plan_id": sub_plan_id,
             }
         )
         refresh_token = await generate_jwt_token(
             {
                 "user_id": user.id,
                 "user_agent": request.headers.get("user-agent"),
-                "role": user.roles[0].name,
+                "role": role_name,
                 "sub_plan_expires_in": expires_in,
-                "sub_plan_id": subscription.subscription_plan_id,
+                "sub_plan_id": sub_plan_id,
             },
             "refresh",
         )

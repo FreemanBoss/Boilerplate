@@ -231,7 +231,7 @@ class LoginShema(BaseModel):
         str,
         StringConstraints(strict=True, strip_whitespace=True, min_length=6),
     ] = Field(examples=["Habeeb1234@"])
-    device_info: DeviceInfo
+    device_info: Optional[DeviceInfo] = None
 
     @model_validator(mode="before")
     @classmethod
@@ -493,8 +493,11 @@ def validate_user_email(email: str) -> Optional[str]:
     try:
         email_regex = r"^[\w\.-]+@[\w\.-]+\.\w+$"
         pattern = re.compile(email_regex)
+        should_check_deliverability = not TEST
         email = validate_email(
-            email, check_deliverability=True, test_environment=TEST
+            email,
+            check_deliverability=should_check_deliverability,
+            test_environment=TEST,
         ).normalized
         if not pattern.match(email):
             raise ValueError(f"{email} is invalid")

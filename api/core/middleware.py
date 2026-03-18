@@ -39,15 +39,9 @@ class RequestLoggerMiddleware(BaseHTTPMiddleware):
                 ),
             )
 
-        # Log initial request info, masking sensitive information
+        # Log initial request info without consuming body stream.
         start_time = time.time()
-        try:
-            payload = await request.json()
-            for sensitive_field in ["password", "confirm_password", "secret_token"]:
-                if sensitive_field in payload:
-                    payload[sensitive_field] = "************"
-        except Exception:
-            payload = {}
+        query_params = dict(request.query_params)
         logger.info(
             "Request received",
             extra={
@@ -55,13 +49,13 @@ class RequestLoggerMiddleware(BaseHTTPMiddleware):
                 "user_agent": user_agent,
                 "path": request.url.path,
                 "method": request.method,
-                "payload": payload,
+                "query_params": query_params,
             },
         )
 
         # Retrieve authenticated user if available
-        if not hasattr(request, "current_user"):
-            request.current_user = None
+        if not hasattr(request.state, "current_user"):
+            request.state.current_user = None
 
         # Process the request
         response = await call_next(request)

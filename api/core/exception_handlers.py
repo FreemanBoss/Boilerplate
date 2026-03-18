@@ -43,14 +43,16 @@ async def exception(request: Request, exc: Exception) -> JSONResponse:
     Returns 500 status code
     """
     logger.error(
-        msg=f"Unhandled Exception: {exc}", extra=get_user_ip_and_agent(request)
+        msg=f"Unhandled Exception: {exc}",
+        extra=get_user_ip_and_agent(request),
+        exc_info=True,
     )
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content=jsonable_encoder(
             {
                 "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
-                "message": "An Unexpected Error Occured",
+                "message": "An Unexpected Error Occurred",
                 "data": {},
             }
         ),
@@ -73,7 +75,7 @@ async def http_exception(request: Request, exc: HTTPException) -> JSONResponse:
     )
 
 
-async def validation_excption_handler(
+async def validation_exception_handler(
     request: Request, exc: RequestValidationError
 ) -> JSONResponse:
     """
@@ -92,6 +94,10 @@ async def validation_excption_handler(
             }
         ),
     )
+
+
+# Backward-compatible alias for existing imports.
+validation_excption_handler = validation_exception_handler
 
 
 async def sqlalchemy_exception_handler(
@@ -122,8 +128,8 @@ async def redis_exception_handler(request: Request, exc: RedisError) -> JSONResp
         status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
         content=jsonable_encoder(
             {
-                "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
-                "message": "Internal Server Error.",
+                "status_code": status.HTTP_503_SERVICE_UNAVAILABLE,
+                "message": "Service temporarily unavailable.",
                 "data": {},
             }
         ),
