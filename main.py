@@ -54,8 +54,8 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="Freeman FastAPI Boilerplate",
-    description="Freeman FastAPI Boilerplate documentation",
+    title="FastAPI Boilerplate",
+    description="Production-ready FastAPI boilerplate",
     version="1.0.0",
     lifespan=lifespan,
     json_dumps=orjson_dumps,
@@ -92,7 +92,7 @@ async def read_root() -> dict:
     """
     Read root
     """
-    return {"message": "Welcome to Freeman FastAPI Boilerplate"}
+    return {"message": "Welcome to FastAPI Boilerplate"}
 
 
 app.add_exception_handler(HTTPException, http_exception)
